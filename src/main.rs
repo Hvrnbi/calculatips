@@ -17,12 +17,36 @@ fn main() -> iced::Result {
 
 #[derive(Debug, Clone)]
 enum Message{
+    // Theme button message
     ToggleTheme,
+    // Numbers messages
+    Pressed0,
+    Pressed1,
+    Pressed2,
+    Pressed3,
+    Pressed4,
+    Pressed5,
+    Pressed6,
+    Pressed7,
+    Pressed8,
+    Pressed9,
+    // Other messages
+    PressedDot,
+    PressedEqual,
+    PressedDel,
+    PressedClear,
+    PressedOpeningParanthesis,
+    PressedClosingParanthesis,
+    PressedAddition,
+    PressedSubstraction,
+    PressedMultiplication,
+    PressedDivision,
 }
 
 #[derive(Default)]
 struct MyApp{
     theme: iced::Theme,
+    displayed_calc: String,
 }
 
 impl MyApp {
@@ -55,7 +79,28 @@ impl MyApp {
                     iced::Theme::TokyoNightStorm => iced::Theme::CatppuccinFrappe,
                     _ => iced::Theme::CatppuccinFrappe,
                 };
-            }
+            },
+            // When then keyboard buttons are pressed
+            Message::Pressed0 => if self.displayed_calc.len()<30 {self.displayed_calc += "0"},
+            Message::Pressed1 => if self.displayed_calc.len()<30 {self.displayed_calc += "1"},
+            Message::Pressed2 => if self.displayed_calc.len()<30 {self.displayed_calc += "2"},
+            Message::Pressed3 => if self.displayed_calc.len()<30 {self.displayed_calc += "3"},
+            Message::Pressed4 => if self.displayed_calc.len()<30 {self.displayed_calc += "4"},
+            Message::Pressed5 => if self.displayed_calc.len()<30 {self.displayed_calc += "5"},
+            Message::Pressed6 => if self.displayed_calc.len()<30 {self.displayed_calc += "6"},
+            Message::Pressed7 => if self.displayed_calc.len()<30 {self.displayed_calc += "7"},
+            Message::Pressed8 => if self.displayed_calc.len()<30 {self.displayed_calc += "8"},
+            Message::Pressed9 => if self.displayed_calc.len()<30 {self.displayed_calc += "9"},
+            Message::PressedAddition => if self.displayed_calc.len()<30 {self.displayed_calc += "+"},
+            Message::PressedSubstraction => if self.displayed_calc.len()<30 {self.displayed_calc += "-"},
+            Message::PressedMultiplication => if self.displayed_calc.len()<30 {self.displayed_calc += "x"},
+            Message::PressedDivision => if self.displayed_calc.len()<30 {self.displayed_calc += "÷"},
+            Message::PressedOpeningParanthesis => if self.displayed_calc.len()<30 {self.displayed_calc += "("},
+            Message::PressedClosingParanthesis => if self.displayed_calc.len()<30 {self.displayed_calc += ")"},
+            Message::PressedDot => if self.displayed_calc.len()<30 {self.displayed_calc += "."},
+            Message::PressedDel => self.displayed_calc = self.displayed_calc[..self.displayed_calc.len()-1].to_string(),
+            Message::PressedClear => self.displayed_calc.clear(),
+            _ => ()
         }
     }
 
@@ -65,10 +110,10 @@ impl MyApp {
                 // Space left to the next field
                 horizontal_space().width(Length::FillPortion(1)),
                 // Text widget where the user inputs will be displayed
-                text("2+2").width(Length::FillPortion(4)).height(80).align_x(Horizontal::Left).align_y(Vertical::Center).size(40),
+                text(self.displayed_calc.clone()).width(Length::FillPortion(6)).height(80).align_x(Horizontal::Left).align_y(Vertical::Center).size(32),
                 vertical_rule(4),
                 // Text widget where the result of the calcul  will be displayed
-                text("4").width(Length::FillPortion(2)).height(80).align_x(Horizontal::Center).align_y(Vertical::Center).size(40),
+                text("4").width(Length::FillPortion(2)).height(80).align_x(Horizontal::Center).align_y(Vertical::Center).size(32),
             ],
             horizontal_rule(4),
             // Text for Tips
@@ -80,19 +125,19 @@ impl MyApp {
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
                 // Clear button
-                button("Ø").padding(30).width(70),
+                button("Ø").padding(30).width(70).on_press(Message::PressedClear),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // ( button
-                button("(").padding(30).width(70),
+                button("(").padding(30).width(70).on_press(Message::PressedOpeningParanthesis),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // ) button
-                button(")").padding(30).width(70),
+                button(")").padding(30).width(70).on_press(Message::PressedClosingParanthesis),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // / button
-                button("÷").padding(30).width(70),
+                button("÷").padding(30).width(70).on_press(Message::PressedDivision),
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
             ],
@@ -102,19 +147,19 @@ impl MyApp {
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
                 // 7 button
-                button("7").padding(30).width(70),
+                button("7").padding(30).width(70).on_press(Message::Pressed7),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // 8 button
-                button("8").padding(30).width(70),
+                button("8").padding(30).width(70).on_press(Message::Pressed8),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // 9 button
-                button("8").padding(30).width(70),
+                button("8").padding(30).width(70).on_press(Message::Pressed9),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // * button
-                button("x").padding(30).width(70),
+                button("x").padding(30).width(70).on_press(Message::PressedMultiplication),
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
             ],
@@ -124,19 +169,19 @@ impl MyApp {
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
                 // 4 button
-                button("4").padding(30).width(70),
+                button("4").padding(30).width(70).on_press(Message::Pressed4),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // 5 button
-                button("5").padding(30).width(70),
+                button("5").padding(30).width(70).on_press(Message::Pressed5),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // 6 button
-                button("6").padding(30).width(70),
+                button("6").padding(30).width(70).on_press(Message::Pressed6),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // - button
-                button("-").padding(30).width(70),
+                button("-").padding(30).width(70).on_press(Message::PressedSubstraction),
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
             ],
@@ -146,19 +191,19 @@ impl MyApp {
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
                 // 1 button
-                button("1").padding(30).width(70),
+                button("1").padding(30).width(70).on_press(Message::Pressed1),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // 2 button
-                button("2").padding(30).width(70),
+                button("2").padding(30).width(70).on_press(Message::Pressed2),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // 3 button
-                button("3").padding(30).width(70),
+                button("3").padding(30).width(70).on_press(Message::Pressed3),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // + button
-                button("+").padding(30).width(70),
+                button("+").padding(30).width(70).on_press(Message::PressedAddition),
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
             ],
@@ -168,19 +213,19 @@ impl MyApp {
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
                 // . button
-                button(".").padding(30).width(70),
+                button(".").padding(30).width(70).on_press(Message::PressedDot),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // 0 button
-                button("0").padding(30).width(70),
+                button("0").padding(30).width(70).on_press(Message::Pressed0),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // = button
-                button("=").padding(30).width(70),
+                button("=").padding(30).width(70).on_press(Message::PressedEqual),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // Delete button
-                button("←").padding(30).width(70),
+                button("←").padding(30).width(70).on_press(Message::PressedDel),
                 // Space left to the first button
                 horizontal_space().width(Length::FillPortion(2)),
             ],
