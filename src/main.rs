@@ -94,7 +94,7 @@ impl MyApp {
             Message::PressedAddition => if self.displayed_calc.len()<30 {self.displayed_calc += "+"},
             Message::PressedSubstraction => if self.displayed_calc.len()<30 {self.displayed_calc += "-"},
             Message::PressedMultiplication => if self.displayed_calc.len()<30 {self.displayed_calc += "x"},
-            Message::PressedDivision => if self.displayed_calc.len()<30 {self.displayed_calc += "÷"},
+            Message::PressedDivision => if self.displayed_calc.len()<30 {self.displayed_calc += "/"},
             Message::PressedOpeningParanthesis => if self.displayed_calc.len()<30 {self.displayed_calc += "("},
             Message::PressedClosingParanthesis => if self.displayed_calc.len()<30 {self.displayed_calc += ")"},
             Message::PressedDot => if self.displayed_calc.len()<30 {self.displayed_calc += "."},
@@ -246,3 +246,30 @@ impl MyApp {
 
 }
 
+
+// A simplified eval() function
+fn eval(calc:&String) -> f64 {
+    for (_i,car) in calc.chars().enumerate() {
+        if car=='(' {
+            // I'll make it later
+        } else if car=='0' || car=='1' || car=='2' || car=='3' || car=='4' || car=='5' || car=='6' || car=='7' || car=='8' || car=='9' {
+            
+        }
+    }
+    0.0
+
+}
+
+fn find_number(car_chain:&str, index:usize) -> f64{ 
+    let mut thing: &str= &car_chain[index..];
+    for i in 0..thing.len() {
+        if thing.as_bytes()[i]==b'+' || thing.as_bytes()[i]==b'-' || thing.as_bytes()[i]==b'x' || thing.as_bytes()[i]==b'/' {
+            thing = &thing[..i];
+            break
+        }
+    }
+    return match thing.parse::<f64>() {
+        Ok(num) => num,
+        Err(_) => 0.0
+    }
+}
