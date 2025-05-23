@@ -4,6 +4,7 @@ use iced::{
     widget::{button, column, horizontal_rule, vertical_rule, horizontal_space, vertical_space, row, text},
     window, Length, Size
 };
+use evalexpr::{eval};
 
 fn main() -> iced::Result {
     iced::application("My App", MyApp::update, MyApp::view)
@@ -47,6 +48,8 @@ enum Message{
 struct MyApp{
     theme: iced::Theme,
     displayed_calc: String,
+    calc: String,
+    result: String,
 }
 
 impl MyApp {
@@ -81,29 +84,29 @@ impl MyApp {
                 };
             },
             // When then keyboard buttons are pressed
-            Message::Pressed0 => if self.displayed_calc.len()<30 {self.displayed_calc += "0"},
-            Message::Pressed1 => if self.displayed_calc.len()<30 {self.displayed_calc += "1"},
-            Message::Pressed2 => if self.displayed_calc.len()<30 {self.displayed_calc += "2"},
-            Message::Pressed3 => if self.displayed_calc.len()<30 {self.displayed_calc += "3"},
-            Message::Pressed4 => if self.displayed_calc.len()<30 {self.displayed_calc += "4"},
-            Message::Pressed5 => if self.displayed_calc.len()<30 {self.displayed_calc += "5"},
-            Message::Pressed6 => if self.displayed_calc.len()<30 {self.displayed_calc += "6"},
-            Message::Pressed7 => if self.displayed_calc.len()<30 {self.displayed_calc += "7"},
-            Message::Pressed8 => if self.displayed_calc.len()<30 {self.displayed_calc += "8"},
-            Message::Pressed9 => if self.displayed_calc.len()<30 {self.displayed_calc += "9"},
-            Message::PressedAddition => if self.displayed_calc.len()<30 {self.displayed_calc += "+"},
-            Message::PressedSubstraction => if self.displayed_calc.len()<30 {self.displayed_calc += "-"},
-            Message::PressedMultiplication => if self.displayed_calc.len()<30 {self.displayed_calc += "x"},
-            Message::PressedDivision => if self.displayed_calc.len()<30 {self.displayed_calc += "/"},
-            Message::PressedOpeningParanthesis => if self.displayed_calc.len()<30 {self.displayed_calc += "("},
-            Message::PressedClosingParanthesis => if self.displayed_calc.len()<30 {self.displayed_calc += ")"},
-            Message::PressedDot => if self.displayed_calc.len()<30 {self.displayed_calc += "."},
-            Message::PressedDel => self.displayed_calc = self.displayed_calc[..self.displayed_calc.len()-1].to_string(),
-            Message::PressedClear => self.displayed_calc.clear(),
-            _ => ()
+            Message::Pressed0 => if self.displayed_calc.len()<30 {self.displayed_calc += "0"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "0"} else {self.calc += "0."}},
+            Message::Pressed1 => if self.displayed_calc.len()<30 {self.displayed_calc += "1"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "1"} else {self.calc += "1."}},
+            Message::Pressed2 => if self.displayed_calc.len()<30 {self.displayed_calc += "2"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "2"} else {self.calc += "2."}},
+            Message::Pressed3 => if self.displayed_calc.len()<30 {self.displayed_calc += "3"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "3"} else {self.calc += "3."}},
+            Message::Pressed4 => if self.displayed_calc.len()<30 {self.displayed_calc += "4"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "4"} else {self.calc += "4."}},
+            Message::Pressed5 => if self.displayed_calc.len()<30 {self.displayed_calc += "5"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "5"} else {self.calc += "5."}},
+            Message::Pressed6 => if self.displayed_calc.len()<30 {self.displayed_calc += "6"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "6"} else {self.calc += "6."}},
+            Message::Pressed7 => if self.displayed_calc.len()<30 {self.displayed_calc += "7"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "7"} else {self.calc += "7."}},
+            Message::Pressed8 => if self.displayed_calc.len()<30 {self.displayed_calc += "8"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "8"} else {self.calc += "8."}},
+            Message::Pressed9 => if self.displayed_calc.len()<30 {self.displayed_calc += "9"; if in_float(&self.calc){if &self.displayed_calc[self.displayed_calc.len()-1..] != "." {self.calc = self.calc[..self.calc.len()-1].to_string(); println!("aaa")} self.calc += "9"} else {self.calc += "9."}},
+            Message::PressedAddition => if self.displayed_calc.len()<30 {self.displayed_calc += "+"; self.calc += "+"},
+            Message::PressedSubstraction => if self.displayed_calc.len()<30 {self.displayed_calc += "-"; self.calc += "-"},
+            Message::PressedMultiplication => if self.displayed_calc.len()<30 {self.displayed_calc += "x"; self.calc += "*"},
+            Message::PressedDivision => if self.displayed_calc.len()<30 {self.displayed_calc += "÷"; self.calc += "/"},
+            Message::PressedOpeningParanthesis => if self.displayed_calc.len()<30 {self.displayed_calc += "("; self.calc += "("},
+            Message::PressedClosingParanthesis => if self.displayed_calc.len()<30 {self.displayed_calc += ")"; self.calc += ")"},
+            Message::PressedDot => if self.displayed_calc.len()<30 && !in_float(&self.displayed_calc) {self.displayed_calc += "."; if &self.calc[self.calc.len()-1..] != "." {self.calc+= "."} } ,
+            Message::PressedDel => if self.displayed_calc!="" {self.displayed_calc = self.displayed_calc[..self.displayed_calc.len()-1].to_string(); if &self.calc[self.calc.len()-1..] == "." {self.calc=self.calc[..self.calc.len()-2].to_string()} else {self.calc=self.calc[..self.calc.len()-1].to_string()}},
+            Message::PressedClear => {self.displayed_calc.clear(); self.calc.clear()},
+            Message::PressedEqual => self.result = eval(&self.calc).expect("None").to_string(),
         }
     }
-
+ 
     fn view(&self) -> iced::Element<Message> {
         column![
             row![
@@ -113,7 +116,7 @@ impl MyApp {
                 text(self.displayed_calc.clone()).width(Length::FillPortion(6)).height(80).align_x(Horizontal::Left).align_y(Vertical::Center).size(32),
                 vertical_rule(4),
                 // Text widget where the result of the calcul  will be displayed
-                text("4").width(Length::FillPortion(2)).height(80).align_x(Horizontal::Center).align_y(Vertical::Center).size(32),
+                text(self.result.to_string()).width(Length::FillPortion(2)).height(80).align_x(Horizontal::Center).align_y(Vertical::Center).size(32),
             ],
             horizontal_rule(4),
             // Text for Tips
@@ -155,7 +158,7 @@ impl MyApp {
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // 9 button
-                button("8").padding(30).width(70).on_press(Message::Pressed9),
+                button("9").padding(30).width(70).on_press(Message::Pressed9),
                 // Space between two buttons
                 horizontal_space().width(Length::FillPortion(1)),
                 // * button
@@ -247,29 +250,45 @@ impl MyApp {
 }
 
 
-// A simplified eval() function
-fn eval(calc:&String) -> f64 {
-    for (_i,car) in calc.chars().enumerate() {
-        if car=='(' {
-            // I'll make it later
-        } else if car=='0' || car=='1' || car=='2' || car=='3' || car=='4' || car=='5' || car=='6' || car=='7' || car=='8' || car=='9' {
-            
-        }
+fn in_float(calc: &String) -> bool {
+    if calc == "" {return false}
+    for (_i, &item) in calc.as_bytes().iter().enumerate().rev() {
+        if item == b'.' {return true}
+        else if item == b'+' || item == b'-' || item == b'*' || item == b'/' /*|| item == b'x' || item == b'\xF7'*/ {return false}
     }
-    0.0
-
+    false
 }
 
-fn find_number(car_chain:&str, index:usize) -> f64{ 
-    let mut thing: &str= &car_chain[index..];
-    for i in 0..thing.len() {
-        if thing.as_bytes()[i]==b'+' || thing.as_bytes()[i]==b'-' || thing.as_bytes()[i]==b'x' || thing.as_bytes()[i]==b'/' {
-            thing = &thing[..i];
-            break
-        }
-    }
-    return match thing.parse::<f64>() {
-        Ok(num) => num,
-        Err(_) => 0.0
-    }
-}
+
+
+
+// It's hard so I use a crate, I'll make it myself later if I have the time
+
+// A simplified Python eval() function
+//fn eval(calc:&String) -> f64 {
+//    for (_i,car) in calc.chars().enumerate() {
+//        if car=='(' {
+//            // I'll make it later
+//        } else if car=='0' || car=='1' || car=='2' || car=='3' || car=='4' || car=='5' || car=='6' || car=='7' || car=='8' || car=='9' {
+//            
+//        }
+//    }
+//    0.0
+//
+//}
+
+//fn find_number(car_chain:&str, index:usize) -> f64{ 
+//    if index < car_chain.len()-1 {
+//        let mut thing: &str= &car_chain[index..];
+//        for i in 0..thing.len() {
+//            if thing.as_bytes()[i]==b'+' || thing.as_bytes()[i]==b'-' || thing.as_bytes()[i]==b'x' || thing.as_bytes()[i]==b'/' {
+//                let new_thing = &thing[..i];
+//                break
+//            }
+//        }
+//        return match new_thing.parse::<f64>() {
+//            Ok(num) => num,
+//            Err(_) => 0.0
+//        }, find_number(thing, new_thing.len())
+//    }
+//}
