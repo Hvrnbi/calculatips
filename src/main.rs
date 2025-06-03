@@ -45,7 +45,6 @@ fn main() -> iced::Result {
 #[derive(Debug, Clone)]
 enum Message{
     TabSelected(TabId),
-    TabClosed(TabId),
     Calculator(CalculatorMessage),
     Settings(SettingsMessage),
 }
@@ -68,7 +67,6 @@ impl Calculatips {
     fn update(&mut self, message: Message) {
         match message {
             Message::TabSelected(selected) => self.active_tab = selected,
-            Message::TabClosed(id) => println!("Tab {:?} closed", id),
             Message::Calculator(message) => self.calculator_tab.update(message),
             Message::Settings(message) => self.settings_tab.update(message),
         }
@@ -78,7 +76,6 @@ impl Calculatips {
 
         Tabs::new(Message::TabSelected)
             .tab_icon_position(iced_aw::tabs::Position::Top)
-            .on_close(Message::TabClosed)
             .push(
                 TabId::Calculator,
                 self.calculator_tab.tab_label(),

@@ -2,9 +2,7 @@
 use evalexpr::eval ;
 // GUI crate
 use iced::{
-    alignment::{Horizontal, Vertical},
-    widget::{button, column, horizontal_rule, vertical_rule, horizontal_space, vertical_space, row, text, Container},
-    Length, Element,
+    alignment::{Horizontal, Vertical}, widget::{button, column, horizontal_rule, horizontal_space, row, text, vertical_rule, vertical_space, Container}, Element, Length
 };
 use iced_aw::tab_bar::TabLabel;
 use crate::{Icon, Message, Tab};
@@ -238,6 +236,87 @@ fn in_float(calc: &String) -> bool {
     false
 }
 
+
+// CALCULATIONS
+
+// Calls all the functions needed while the string is not a single number
+fn calculate_all(calc: &String) -> String {
+    while !is_a_single_number(calc) {
+
+    }
+    String::from("0")
+}
+
+// Calculates a simple calculation
+fn calculate_one_calcul(calc: &String) -> f64 {
+    for (i, &item) in calc.as_bytes().iter().enumerate() {
+        if i == 0 {
+            if &item == &b'(' {
+                return calc[1..calc.len()-1].parse().unwrap_or(0.0)
+            } else {
+                continue
+            }
+        }
+        if &item == &b'+' {
+            return calc[..i].parse().unwrap_or(0.0)+calc[i+1..].parse().unwrap_or(0.0)
+        } else if &item == &b'-' {
+            return calc[..i].parse().unwrap_or(0.0)-calc[i+1..].parse().unwrap_or(0.0)
+        } else if &item == &b'*' {
+            return calc[..i].parse().unwrap_or(0.0)*calc[i+1..].parse().unwrap_or(0.0)
+        } else if &item == &b'/' {
+            return calc[..i].parse().unwrap_or(0.0)/calc[i+1..].parse().unwrap_or(0.0)
+        }
+    }
+    0.0
+}
+
+// Verifiy if a string is a single number (returns true) or a calculation (returns false)
+fn is_a_single_number(calc: &String) -> bool {
+    for (_i, &item) in calc.as_bytes().iter().enumerate() {
+        if &item == &b'+' || &item == &b'-' || &item == &b'*' || &item == &b'/' {
+            return false
+        }
+    }
+    true
+}
+
+// Find the operation to do first, returns a tuple with the index of
+// the first digit of the first number and the last digit of the second number
+fn find_priority(calc: &String) -> (usize, usize) {
+    let mut operator = b' ';
+    let mut op_index: usize = 0;
+    for (i, &item) in calc.as_bytes().iter().enumerate() {
+        if &item == &b'+' || &item == &b'-' {
+            if operator == b' ' || operator == b'(' {
+                operator = item;
+                op_index = i;
+            }
+        } else if &item == &b'*' || &item == &b'/' {
+            
+        }
+    }
+    (0,0)
+}
+
+// Find the index of the start of the previous number
+fn find_previous(calc: &String) -> usize {
+    for (i, &item) in calc.as_bytes().iter().enumerate().rev() {
+        if &item == &b'+' || &item == &b'-' || &item == &b'*' || &item == &b'/' || &item == &b')' || &item == &b'(' {
+            return i+1
+        }
+    }
+    0
+}
+
+// Find the index of the end of the next number
+fn find_next(calc: &String) -> usize {
+    for (i, &item) in calc.as_bytes().iter().enumerate() {
+        if &item == &b'+' || &item == &b'-' || &item == &b'*' || &item == &b'/' || &item == &b')' || &item == &b'(' {
+            return i-1
+        }
+    }
+    calc.len()-1
+}
 
 
 
