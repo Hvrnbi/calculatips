@@ -1,5 +1,3 @@
-// Calulation crate
-use evalexpr::eval ;
 // GUI crate
 use iced::{
     alignment::{Horizontal, Vertical}, widget::{button, column, horizontal_rule, horizontal_space, row, text, vertical_rule, vertical_space, Container}, Element, Length
@@ -77,7 +75,7 @@ impl CalculatorTab{
             CalculatorMessage::PressedDot => if self.displayed_calc.len()<90 && !in_float(&self.displayed_calc) {self.displayed_calc += "."; if &self.calc[self.calc.len()-1..] != "." {self.calc+= "."} } ,
             CalculatorMessage::PressedDel => if self.displayed_calc!="" {self.displayed_calc = self.displayed_calc[..self.displayed_calc.len()-1].to_string(); if &self.calc[self.calc.len()-1..] == "." {self.calc=self.calc[..self.calc.len()-2].to_string()} else {self.calc=self.calc[..self.calc.len()-1].to_string()}},
             CalculatorMessage::PressedClear => {self.displayed_calc.clear(); self.calc.clear(); self.result.clear();},
-            CalculatorMessage::PressedEqual => self.result = eval(&self.calc).expect("None").to_string(),
+            CalculatorMessage::PressedEqual => {self.result = calculate_all(&self.calc); if &self.result[self.result.len()-1..] == "." {self.result = self.result[..self.result .len()-1].to_string()}},
         }
     }
 
@@ -230,8 +228,8 @@ impl Tab for CalculatorTab{
 fn in_float(calc: &String) -> bool {
     if calc == "" {return false}
     for (_i, &item) in calc.as_bytes().iter().enumerate().rev() {
-        if item == b'.' {return true}
-        else if item == b'+' || item == b'-' || item == b'*' || item == b'/' /*|| item == b'x' || item == b'\xF7'*/ {return false}
+        if item == b'.' {return true;}
+        else if item == b'+' || item == b'-' || item == b'*' || item == b'/' /*|| item == b'x' || item == b'\xF7'*/ {return false;}
     }
     false
 }
@@ -241,30 +239,42 @@ fn in_float(calc: &String) -> bool {
 
 // Calls all the functions needed while the string is not a single number
 fn calculate_all(calc: &String) -> String {
-    while !is_a_single_number(calc) {
-
+    let mut c = calc.to_string();
+    while !is_a_single_number(&c) {
+        let p = find_priority(&c);
+        if p.0 == 0 && p.1 == c.len() {
+            c = format!("{:?}", calculate_one_calcul(&c));
+        } else if p.0 == 0 {
+            c = format!("{:?}{}", calculate_one_calcul(&c[p.0..p.1+1].to_string()), c[p.1+1..].to_string());
+        } else if p.1 == c.len() {
+            c = format!("{}{:?}", c[..p.0].to_string(), calculate_one_calcul(&c[p.0..p.1+1].to_string()));
+        } else {
+            c = format!("{}{:?}{}", c[..p.0].to_string(), calculate_one_calcul(&c[p.0..p.1+1].to_string()), c[p.1+1..].to_string());
+        }
+        println!("c : {}", c);
     }
-    String::from("0")
+    c
 }
 
 // Calculates a simple calculation
 fn calculate_one_calcul(calc: &String) -> f64 {
+    println!("{}", calc);
     for (i, &item) in calc.as_bytes().iter().enumerate() {
         if i == 0 {
             if &item == &b'(' {
-                return calc[1..calc.len()-1].parse().unwrap_or(0.0)
+                return calc[1..calc.len()-1].parse().unwrap_or(0.0);
             } else {
                 continue
             }
         }
         if &item == &b'+' {
-            return calc[..i].parse().unwrap_or(0.0)+calc[i+1..].parse().unwrap_or(0.0)
+            return calc[..i].parse().unwrap_or(0.0)+calc[i+1..].parse().unwrap_or(0.0);
         } else if &item == &b'-' {
-            return calc[..i].parse().unwrap_or(0.0)-calc[i+1..].parse().unwrap_or(0.0)
+            return calc[..i].parse().unwrap_or(0.0)-calc[i+1..].parse().unwrap_or(0.0);
         } else if &item == &b'*' {
-            return calc[..i].parse().unwrap_or(0.0)*calc[i+1..].parse().unwrap_or(0.0)
+            return calc[..i].parse().unwrap_or(0.0)*calc[i+1..].parse().unwrap_or(0.0);
         } else if &item == &b'/' {
-            return calc[..i].parse().unwrap_or(0.0)/calc[i+1..].parse().unwrap_or(0.0)
+            return calc[..i].parse().unwrap_or(0.0)/calc[i+1..].parse().unwrap_or(0.0);
         }
     }
     0.0
@@ -273,8 +283,8 @@ fn calculate_one_calcul(calc: &String) -> f64 {
 // Verifiy if a string is a single number (returns true) or a calculation (returns false)
 fn is_a_single_number(calc: &String) -> bool {
     for (_i, &item) in calc.as_bytes().iter().enumerate() {
-        if &item == &b'+' || &item == &b'-' || &item == &b'*' || &item == &b'/' {
-            return false
+        if &item == &b'+' || &item == &b'-' || &item == &b'*' || &item == &b'/' || &item == &b'(' || &item == &b')' {
+            return false;
         }
     }
     true
@@ -292,8 +302,19 @@ fn find_priority(calc: &String) -> (usize, usize) {
                 op_index = i;
             }
         } else if &item == &b'*' || &item == &b'/' {
-            
+            if operator == b' ' || operator == b'(' || &item == &b'+' || &item == &b'-'{
+                operator = item;
+                op_index = i;
+            }
+        } else if &item == &b'(' {
+            operator = item;
+            op_index = i;
         }
+    }
+    if operator == b'+' || operator == b'-' || operator == b'*' || operator == b'/' {
+        return (find_previous(&calc[..op_index].to_string()), find_next(&calc[op_index+1..].to_string()) + op_index);
+    } else if operator == b'(' {
+        return (op_index, find_close_parantheses(&calc[op_index+1..].to_string()) + op_index + 1);
     }
     (0,0)
 }
@@ -302,7 +323,7 @@ fn find_priority(calc: &String) -> (usize, usize) {
 fn find_previous(calc: &String) -> usize {
     for (i, &item) in calc.as_bytes().iter().enumerate().rev() {
         if &item == &b'+' || &item == &b'-' || &item == &b'*' || &item == &b'/' || &item == &b')' || &item == &b'(' {
-            return i+1
+            return i+1;
         }
     }
     0
@@ -312,41 +333,17 @@ fn find_previous(calc: &String) -> usize {
 fn find_next(calc: &String) -> usize {
     for (i, &item) in calc.as_bytes().iter().enumerate() {
         if &item == &b'+' || &item == &b'-' || &item == &b'*' || &item == &b'/' || &item == &b')' || &item == &b'(' {
-            return i-1
+            return i;
         }
     }
     calc.len()-1
 }
 
-
-
-// It's hard so I use a crate, I'll make it myself later if I have the time
-
-// A simplified Python eval() function
-//fn eval(calc:&String) -> f64 {
-//    for (_i,car) in calc.chars().enumerate() {
-//        if car=='(' {
-//            // I'll make it later
-//        } else if car=='0' || car=='1' || car=='2' || car=='3' || car=='4' || car=='5' || car=='6' || car=='7' || car=='8' || car=='9' {
-//            
-//        }
-//    }
-//    0.0
-//
-//}
-
-//fn find_number(car_chain:&str, index:usize) -> f64{ 
-//    if index < car_chain.len()-1 {
-//        let mut thing: &str= &car_chain[index..];
-//        for i in 0..thing.len() {
-//            if thing.as_bytes()[i]==b'+' || thing.as_bytes()[i]==b'-' || thing.as_bytes()[i]==b'x' || thing.as_bytes()[i]==b'/' {
-//                let new_thing = &thing[..i];
-//                break
-//            }
-//        }
-//        return match new_thing.parse::<f64>() {
-//            Ok(num) => num,
-//            Err(_) => 0.0
-//        }, find_number(thing, new_thing.len())
-//    }
-//}
+fn find_close_parantheses(calc: &String) -> usize {
+    for (i, &item) in calc.as_bytes().iter().enumerate() {
+        if &item == &b')' {
+            return i;
+        }
+    }
+    calc.len()-1
+}
