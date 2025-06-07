@@ -10,3 +10,11 @@ Calculatips is a calculator mobile app written in Rust that gives you some menta
 
 ### ⚠️ This app is under development and is not working at the moment
 ### The french version will be produced first, with the English version to follow later.
+
+______________________________
+
+# To run the app :
+
+• Download [Rust and Cargo](https://www.rust-lang.org/tools/install)
+• Clone the repo
+• Run the ```cargo run``` command in the root folder
