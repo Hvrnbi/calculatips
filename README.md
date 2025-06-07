@@ -15,6 +15,6 @@ ______________________________
 
 # To run the app :
 
-• Download [Rust and Cargo](https://www.rust-lang.org/tools/install)
-• Clone the repo
-• Run the ```cargo run``` command in the root folder
+* Download [Rust and Cargo](https://www.rust-lang.org/tools/install)
+* Clone the repo
+* Run the ```cargo run``` command in the root folder
