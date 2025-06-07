@@ -55,7 +55,7 @@ impl Tab for SettingsTab {
     type Message = Message;
 
     fn tab_label(&self) -> TabLabel {
-        TabLabel::IconText(Icon::Settings.into(), String::from("Settings"))
+        TabLabel::IconText(Icon::Settings.into(), String::from("Paramètres"))
     }
 
     fn content(&self) -> Element<'_, Self::Message> {

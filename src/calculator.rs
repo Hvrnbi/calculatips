@@ -69,7 +69,7 @@ impl CalculatorTab{
             CalculatorMessage::PressedAddition => if self.displayed_calc.len()<90 {self.displayed_calc += "+"; self.calc += "+"},
             CalculatorMessage::PressedSubstraction => if self.displayed_calc.len()<90 {self.displayed_calc += "-"; self.calc += "-"},
             CalculatorMessage::PressedMultiplication => if self.displayed_calc.len()<90 {self.displayed_calc += "x"; self.calc += "*"},
-            CalculatorMessage::PressedDivision => if self.displayed_calc.len()<90 {self.displayed_calc += "÷"; self.calc += "/"},
+            CalculatorMessage::PressedDivision => if self.displayed_calc.len()<90 {self.displayed_calc += "%"; self.calc += "/"},
             CalculatorMessage::PressedOpeningParanthesis => if self.displayed_calc.len()<90 {self.displayed_calc += "("; self.calc += "("},
             CalculatorMessage::PressedClosingParanthesis => if self.displayed_calc.len()<90 {self.displayed_calc += ")"; self.calc += ")"},
             CalculatorMessage::PressedDot => if self.displayed_calc.len()<90 && !in_float(&self.displayed_calc) {self.displayed_calc += "."; if &self.calc[self.calc.len()-1..] != "." {self.calc+= "."} } ,
@@ -86,7 +86,7 @@ impl Tab for CalculatorTab{
     type Message = Message;
 
     fn tab_label(&self) -> TabLabel {
-        TabLabel::IconText(Icon::Calc.into(), String::from("Calculator"))
+        TabLabel::IconText(Icon::Calc.into(), String::from("Calculatrice"))
     }
 
     fn content(&self) -> Element<'_, Self::Message> {
@@ -282,7 +282,10 @@ fn calculate_one_calcul(calc: &String) -> f64 {
 
 // Verifiy if a string is a single number (returns true) or a calculation (returns false)
 fn is_a_single_number(calc: &String) -> bool {
-    for (_i, &item) in calc.as_bytes().iter().enumerate() {
+    for (i, &item) in calc.as_bytes().iter().enumerate() {
+        if i == 0 && &item == &b'-' {
+            continue
+        }
         if &item == &b'+' || &item == &b'-' || &item == &b'*' || &item == &b'/' || &item == &b'(' || &item == &b')' {
             return false;
         }
@@ -295,8 +298,12 @@ fn is_a_single_number(calc: &String) -> bool {
 fn find_priority(calc: &String) -> (usize, usize) {
     let mut operator = b' ';
     let mut op_index: usize = 0;
+    let mut previous = b' ';
     for (i, &item) in calc.as_bytes().iter().enumerate() {
         if &item == &b'+' || &item == &b'-' {
+            if previous == b'(' || i == 0{
+                continue
+            }
             if operator == b' ' || operator == b'(' {
                 operator = item;
                 op_index = i;
@@ -309,7 +316,12 @@ fn find_priority(calc: &String) -> (usize, usize) {
         } else if &item == &b'(' {
             operator = item;
             op_index = i;
+        } else if &item == &b')' {
+            if operator == b'(' {
+                break
+            }
         }
+        previous = item.clone();
     }
     if operator == b'+' || operator == b'-' || operator == b'*' || operator == b'/' {
         return (find_previous(&calc[..op_index].to_string()), find_next(&calc[op_index+1..].to_string()) + op_index);
@@ -332,11 +344,14 @@ fn find_previous(calc: &String) -> usize {
 // Find the index of the end of the next number
 fn find_next(calc: &String) -> usize {
     for (i, &item) in calc.as_bytes().iter().enumerate() {
+        if i == 0 && &item == &b'-' {
+            continue;
+        }
         if &item == &b'+' || &item == &b'-' || &item == &b'*' || &item == &b'/' || &item == &b')' || &item == &b'(' {
             return i;
         }
     }
-    calc.len()-1
+    calc.len()
 }
 
 fn find_close_parantheses(calc: &String) -> usize {

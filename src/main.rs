@@ -2,7 +2,7 @@
 use iced::{
     alignment::{Horizontal, Vertical},
     widget::{Column, Container},
-    Element, Length, window, Size, Font,
+    Element, Length, window, Size, Point, Font,
 };
 use iced_aw::{style::tab_bar, TabLabel, Tabs};
 // Import of the calculator tab
@@ -36,6 +36,7 @@ fn main() -> iced::Result {
         .theme(Calculatips::theme)
         .window(window::Settings {
             size : Size { width: (405.), height: (720.) },
+            position: window::Position::Specific(Point { x: 50., y: 50. }),
             ..window::Settings::default()
         })
         .font(ICON_BYTES)
